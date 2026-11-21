@@ -17,7 +17,7 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
 <main class="app">
 <header class="top"><div class="brand"><div class="logo">✣</div><div><b>COLOR MEISTER</b><small>THE COLOR MIXING GAME</small></div></div><div class="pill" id="roundPill">ROUND 1 / 5</div></header>
 <section class="hero"><div class="eyebrow">COLOR MATCH CHALLENGE</div><h1>色を、つくろう。</h1><p>赤・黄・青の絵の具を混ぜて、お題の色を再現しよう！</p></section>
-<div class="game-picker" role="group" aria-label="ゲームモード"><button class="game-btn active" id="bestMode">🏆 ベストスコア</button><button class="game-btn" id="timeMode">⏱️ タイムアタック</button></div><div class="game-stats"><div class="stat-chip" id="timerChip">残り時間 <strong id="timerValue">60</strong>秒</div><div class="stat-chip">今回の合計 <strong id="totalValue">0</strong>点</div><div class="stat-chip">最高記録 <strong id="bestValue">0</strong>点</div></div><div class="start-wrap" id="startWrap" style="display:none"><button class="start-btn" id="startBtn">▶ スタート</button><p class="start-hint">スタートを押すと60秒のカウントが始まります</p></div><div class="mode-picker" role="group" aria-label="混色方式"><button class="mode-btn" id="rgbMode">💡 光の三原色（RGB）</button><button class="mode-btn active" id="paintMode">🎨 絵の具の三原色</button></div><p class="mode-caption" id="modeCaption">赤・黄・青の絵の具を混ぜる減法混色</p><div class="layout">
+<div class="game-picker" role="group" aria-label="ゲームモード"><button class="game-btn active" id="bestMode">🏆 5問スコア</button><button class="game-btn" id="timeMode">⏱️ 60秒スコア</button><button class="game-btn" id="speedMode">⚡ 10問タイム</button></div><div class="game-stats"><div class="stat-chip" id="timerChip">残り時間 <strong id="timerValue">60.0</strong>秒</div><div class="stat-chip"><span id="totalLabel">今回の合計</span> <strong id="totalValue">0.0</strong><span id="totalUnit">点</span></div><div class="stat-chip"><span id="bestLabel">最高記録</span> <strong id="bestValue">0.0</strong><span id="bestUnit">点</span></div></div><div class="start-wrap" id="startWrap" style="display:none"><button class="start-btn" id="startBtn">▶ スタート</button><p class="start-hint" id="startHint">スタートを押すと計測が始まります</p></div><div class="mode-picker" role="group" aria-label="混色方式"><button class="mode-btn" id="rgbMode">💡 光の三原色（RGB）</button><button class="mode-btn active" id="paintMode">🎨 絵の具の三原色</button></div><p class="mode-caption" id="modeCaption">赤・黄・青の絵の具を混ぜる減法混色</p><div class="layout">
 <section class="panel"><div class="panel-head"><h2>🎨 お題の色</h2><span class="hint">TARGET COLOR</span></div><div class="target-swatch" id="targetSwatch"><span class="target-label">MATCH THIS COLOR</span></div><p class="target-note">絵の具を混ぜて、この色を作ってみよう。正解の配合は最後まで秘密！</p></section>
 <section class="panel"><div class="panel-head"><h2>🧪 調合ビーカー</h2><span class="hint">YOUR MIX</span></div><div class="mix-area"><div class="mix-beaker"><div class="beaker-neck"></div><div class="glass"><div class="liquid" id="liquid"></div><div class="shine"></div><div class="glass-mark"></div></div><div class="beaker-foot"></div></div><div class="mix-code" id="mixCode">#000000</div></div>
 <div class="paint-list">
@@ -35,51 +35,83 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
 (()=>{
  const $=id=>document.getElementById(id);
  const ids=['red','yellow','blue'];
- let mixMode='paint',gameMode='best',target=[163,75,200],round=1,judged=false,total=0,timeLeft=60,timer=null,finished=false,started=true;
+ let mixMode='paint',gameMode='best',target=[163,75,200],previousTarget=null,round=1,judged=false,total=0,timeLeft=60,timer=null,finished=false,started=true,startAt=0,elapsed=0;
  const hex=v=>Math.round(v).toString(16).padStart(2,'0').toUpperCase();
  const code=rgb=>'#'+rgb.map(hex).join('');
  const current=()=>ids.map(id=>Number($(id).value));
  const pigments=[[0.88,0.055,0.035],[0.96,0.78,0.025],[0.035,0.12,0.72]];
+ const one=v=>(Math.round(v*10)/10).toFixed(1);
  function mixPaint(a){const sum=a.reduce((x,y)=>x+y,0);if(!sum)return [255,255,255];const strength=Math.min(1,sum/95);return [0,1,2].map(ch=>{let absorb=0;a.forEach((v,i)=>absorb+=(v/sum)*(-Math.log(Math.max(.012,pigments[i][ch]))));return Math.max(0,Math.min(255,Math.round(255*Math.exp(-absorb*strength*1.55))));});}
  function mixRGB(a){return a.slice();}
  function mix(a){return mixMode==='paint'?mixPaint(a):mixRGB(a);}
+ function colorDistance(a,b){return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);}
+ function randomTarget(){
+  const make=()=>mixMode==='paint'?mixPaint(Array.from({length:3},()=>Math.floor(12+Math.random()*75))):Array.from({length:3},()=>Math.floor(35+Math.random()*221));
+  let candidate=make(),best=candidate,bestDistance=previousTarget?colorDistance(candidate,previousTarget):Infinity;
+  if(previousTarget){
+   for(let i=0;i<100;i++){candidate=make();const d=colorDistance(candidate,previousTarget);if(d>bestDistance){best=candidate;bestDistance=d;}if(d>=65){best=candidate;break;}}
+  }else best=candidate;
+  previousTarget=best.slice();return best;
+ }
  function bestKey(){return 'colorMeisterBest_'+mixMode+'_'+gameMode;}
  function getBest(){try{return Number(localStorage.getItem(bestKey()))||0;}catch(e){return 0;}}
- function saveBest(){if(total>getBest()){try{localStorage.setItem(bestKey(),String(total));}catch(e){} }}
- function updateStats(){$('timerChip').style.display=gameMode==='time'?'':'none';$('timerValue').textContent=timeLeft;$('totalValue').textContent=total;$('bestValue').textContent=getBest();}
+ function saveBest(value){const old=getBest(),better=gameMode==='speed10'?(!old||value<old):value>old;if(better){try{localStorage.setItem(bestKey(),String(value));}catch(e){}}}
+ function updateStats(){
+  $('timerChip').style.display=gameMode==='best'?'none':'';
+  $('timerValue').textContent=gameMode==='time'?one(timeLeft):one(elapsed);
+  $('timerChip').firstChild.textContent=gameMode==='time'?'残り時間 ':'経過時間 ';
+  $('totalLabel').textContent=gameMode==='speed10'?'今回の得点':'今回の合計';
+  $('totalUnit').textContent='点';$('totalValue').textContent=one(total);
+  $('bestLabel').textContent=gameMode==='speed10'?'最速記録':'最高記録';
+  $('bestUnit').textContent=gameMode==='speed10'?'秒':'点';
+  $('bestValue').textContent=getBest()?(gameMode==='speed10'?one(getBest()):one(getBest())):'—';
+ }
  function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
- function startTimer(){stopTimer();if(gameMode!=='time'||finished||!started)return;timer=setInterval(()=>{timeLeft--;updateStats();if(timeLeft<=0)endGame();},1000);}
- function endGame(){
-  stopTimer();finished=true;judged=true;saveBest();updateStats();
+ function tick(){
+  if(!started||finished)return;
+  const now=(Date.now()-startAt)/1000;
+  if(gameMode==='time'){timeLeft=Math.max(0,60-now);if(timeLeft<=0){updateStats();endGame();return;}}
+  else elapsed=now;
+  updateStats();
+ }
+ function startTimer(){stopTimer();if(gameMode==='best'||finished||!started)return;timer=setInterval(tick,100);}
+ function finishPanel(title,detail){
   $('resultPanel').classList.add('show');
   $('targetResult').style.background=code(target);$('mixResult').style.background=code(mix(current()));
   $('targetCode').textContent=code(target);$('yourCode').textContent=code(mix(current()));
-  $('scoreValue').textContent=total;$('scoreLabel').textContent='TIME UP! TOTAL SCORE';
-  $('scoreDetail').textContent='タイムアップ！今回の合計 '+total+' 点。最高記録は '+getBest()+' 点です。';
+  $('scoreValue').textContent=one(total);$('scoreLabel').textContent=title;$('scoreDetail').textContent=detail;
   $('retryBtn').textContent='もう一度挑戦';$('nextBtn').style.display='none';
   $('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
  }
+ function endGame(){
+  if(finished)return;tickFinal();stopTimer();finished=true;judged=true;
+  if(gameMode==='speed10')saveBest(elapsed);else saveBest(total);
+  updateStats();
+  if(gameMode==='speed10')finishPanel('10 QUESTIONS · BEST TIME','10問終了！合計 '+one(elapsed)+' 秒。最速記録は '+(getBest()?one(getBest())+' 秒':'今回が初記録')+' です。');
+  else finishPanel('TIME UP! TOTAL SCORE','タイムアップ！今回の合計 '+one(total)+' 点。最高記録は '+one(getBest())+' 点です。');
+ }
+ function tickFinal(){if(started&&gameMode!=='best')elapsed=(Date.now()-startAt)/1000;}
  function paint(){
   const a=current(),rgb=mix(a),c=code(rgb);
   $('redVal').textContent=a[0];$('yellowVal').textContent=a[1];$('blueVal').textContent=a[2];
   $('liquid').style.background=c;$('liquid').style.height=Math.min(82,Math.max(8,a.reduce((x,y)=>x+y,0)/(mixMode==='rgb'?765:300)*82))+'%';$('mixCode').textContent=c;
  }
  function newRound(){
-  $('nextBtn').textContent='次の色へ →';
-  if(mixMode==='paint'){const secret=Array.from({length:3},()=>Math.floor(12+Math.random()*75));target=mixPaint(secret);}
-  else target=Array.from({length:3},()=>Math.floor(35+Math.random()*221));
+  $('nextBtn').textContent='次の色へ →';target=randomTarget();
   $('targetSwatch').style.background=code(target);
-  $('roundPill').textContent=gameMode==='best'?'ROUND '+round+' / 5':'ROUND '+round;
+  $('roundPill').textContent=gameMode==='best'?'ROUND '+round+' / 5':gameMode==='speed10'?'ROUND '+round+' / 10':'ROUND '+round;
   ids.forEach(id=>$(id).value=mixMode==='rgb'?128:45);
   $('resultPanel').classList.remove('show');$('nextBtn').style.display='';
   $('retryBtn').textContent='もう一度調合';judged=false;paint();
  }
  function startGame(nextMode){
-  stopTimer();gameMode=nextMode;round=1;total=0;timeLeft=60;finished=false;judged=false;started=gameMode!=='time';
-  $('startWrap').style.display=gameMode==='time'?'':'none';$('judgeBtn').disabled=gameMode==='time';$('judgeBtn').style.opacity=gameMode==='time'?'.5':'';
-  $('bestMode').classList.toggle('active',gameMode==='best');$('timeMode').classList.toggle('active',gameMode==='time');
-  $('roundPill').textContent=gameMode==='best'?'ROUND 1 / 5':'ROUND 1';
-  updateStats();newRound();startTimer();
+  stopTimer();gameMode=nextMode;round=1;total=0;timeLeft=60;elapsed=0;finished=false;judged=false;started=gameMode==='best';startAt=0;previousTarget=null;
+  const timed=gameMode!=='best';
+  $('startWrap').style.display=timed?'':'none';$('judgeBtn').disabled=timed;$('judgeBtn').style.opacity=timed?'.5':'';
+  $('startHint').textContent=gameMode==='time'?'スタートを押すと60秒の計測が始まります':'スタートを押すと10問のタイム計測が始まります';
+  $('bestMode').classList.toggle('active',gameMode==='best');$('timeMode').classList.toggle('active',gameMode==='time');$('speedMode').classList.toggle('active',gameMode==='speed10');
+  $('roundPill').textContent=gameMode==='best'?'ROUND 1 / 5':gameMode==='speed10'?'ROUND 1 / 10':'ROUND 1';
+  updateStats();newRound();
  }
  function setMixMode(next){
   mixMode=next;const rgb=next==='rgb';
@@ -93,18 +125,22 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
   startGame(gameMode);
  }
  function judge(){
-  if(judged||finished||(gameMode==='time'&&!started))return;judged=true;
+  if(judged||finished||(gameMode!=='best'&&!started))return;
+  judged=true;
   const rgb=mix(current()),d=Math.sqrt(.299*(rgb[0]-target[0])**2+.587*(rgb[1]-target[1])**2+.114*(rgb[2]-target[2])**2);
-  const score=Math.max(0,Math.round(100*(1-d/255)));total+=score;
+  const score=Math.max(0,Math.round(1000*(1-d/255))/10);total=Math.round((total+score)*10)/10;
   $('targetResult').style.background=code(target);$('mixResult').style.background=code(rgb);
   $('targetCode').textContent=code(target);$('yourCode').textContent=code(rgb);
-  $('scoreValue').textContent=score;$('scoreLabel').textContent=score===100?'PERFECT MATCH!':score>=90?'AMAZING!':score>=75?'GREAT JOB!':score>=50?'NOT BAD!':'KEEP MIXING!';
-  $('scoreDetail').textContent='今回の得点 '+score+' 点 · 合計 '+total+' 点';
+  $('scoreValue').textContent=one(score);$('scoreLabel').textContent=score===100?'PERFECT MATCH!':score>=90?'AMAZING!':score>=75?'GREAT JOB!':score>=50?'NOT BAD!':'KEEP MIXING!';
+  $('scoreDetail').textContent='今回の得点 '+one(score)+' 点 · 合計 '+one(total)+' 点';
   $('resultPanel').classList.add('show');
   if(gameMode==='best'&&round>=5){
-   saveBest();updateStats();$('scoreLabel').textContent='5 ROUND TOTAL';$('scoreValue').textContent=total;
-   $('scoreDetail').textContent='5問終了！合計 '+total+' 点。最高記録は '+getBest()+' 点です。';
-   $('nextBtn').textContent='もう一度挑戦';
+   saveBest(total);updateStats();$('scoreLabel').textContent='5 ROUND TOTAL';$('scoreValue').textContent=one(total);
+   $('scoreDetail').textContent='5問終了！合計 '+one(total)+' 点。最高記録は '+one(getBest())+' 点です。';$('nextBtn').textContent='もう一度挑戦';
+  }else if(gameMode==='speed10'&&round>=10){
+   tickFinal();stopTimer();finished=true;saveBest(elapsed);updateStats();
+   $('scoreLabel').textContent='10 QUESTIONS · BEST TIME';$('scoreValue').textContent=one(elapsed)+'秒';
+   $('scoreDetail').textContent='10問終了！合計 '+one(elapsed)+' 秒。最速記録は '+one(getBest())+' 秒です。';$('nextBtn').style.display='none';$('retryBtn').textContent='もう一度挑戦';
   }else{
    updateStats();$('nextBtn').textContent='次の色へ →';
   }
@@ -115,7 +151,8 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
  $('paintMode').addEventListener('click',()=>{if(mixMode!=='paint')setMixMode('paint');});
  $('bestMode').addEventListener('click',()=>startGame('best'));
  $('timeMode').addEventListener('click',()=>startGame('time'));
- $('startBtn').addEventListener('click',()=>{if(gameMode!=='time'||started||finished)return;started=true;$('startWrap').style.display='none';$('judgeBtn').disabled=false;$('judgeBtn').style.opacity='';startTimer();});
+ $('speedMode').addEventListener('click',()=>startGame('speed10'));
+ $('startBtn').addEventListener('click',()=>{if(gameMode==='best'||started||finished)return;started=true;startAt=Date.now();$('startWrap').style.display='none';$('judgeBtn').disabled=false;$('judgeBtn').style.opacity='';startTimer();updateStats();});
  $('judgeBtn').addEventListener('click',judge);
  $('resetBtn').addEventListener('click',()=>{if(judged||finished)return;ids.forEach(id=>$(id).value=mixMode==='rgb'?128:45);paint();});
  $('retryBtn').addEventListener('click',()=>{if(finished){startGame(gameMode);return;}ids.forEach(id=>$(id).value=mixMode==='rgb'?128:45);$('resultPanel').classList.remove('show');judged=false;paint();});
