@@ -65,6 +65,7 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
   $('liquid').style.background=c;$('liquid').style.height=Math.min(82,Math.max(8,a.reduce((x,y)=>x+y,0)/(mixMode==='rgb'?765:300)*82))+'%';$('mixCode').textContent=c;
  }
  function newRound(){
+  $('nextBtn').textContent='次の色へ →';
   if(mixMode==='paint'){const secret=Array.from({length:3},()=>Math.floor(12+Math.random()*75));target=mixPaint(secret);}
   else target=Array.from({length:3},()=>Math.floor(35+Math.random()*221));
   $('targetSwatch').style.background=code(target);
@@ -82,7 +83,7 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
  function setMixMode(next){
   mixMode=next;const rgb=next==='rgb';
   $('rgbMode').classList.toggle('active',rgb);$('paintMode').classList.toggle('active',!rgb);
-  $('modeCaption').textContent=rgb?'赤・緑・青の光を重ねる加法混色':'赤・黄・青の絵の具を混ぜる減法混色';
+  $('modeCaption').textContent=rgb?'赤・緑・青の光を重ねる加法混色':'赤・黄・青の絵の具を混ぜる減法混色';$('targetSwatch').nextElementSibling.textContent=rgb?'光の三原色を重ねて、この色を作ってみよう。':'絵の具を混ぜて、この色を作ってみよう。';
   $('middleName').textContent=rgb?'GREEN / 緑':'YELLOW / 黄';$('middleDot').textContent=rgb?'G':'Y';$('middleDot').style.background=rgb?'#22a06b':'#eab308';
   document.querySelectorAll('.paint-row')[1].style.setProperty('--c',rgb?'#22a06b':'#eab308');
   $('redName').textContent='RED / 赤';$('blueName').textContent='BLUE / 青';
@@ -102,7 +103,7 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
   if(gameMode==='best'&&round>=5){
    saveBest();updateStats();$('scoreLabel').textContent='5 ROUND TOTAL';$('scoreValue').textContent=total;
    $('scoreDetail').textContent='5問終了！合計 '+total+' 点。最高記録は '+getBest()+' 点です。';
-   $('nextBtn').textContent='もう一度挑戦';$('nextBtn').onclick=()=>startGame(gameMode);
+   $('nextBtn').textContent='もう一度挑戦';
   }else{
    updateStats();$('nextBtn').textContent=gameMode==='time'?'次の色へ →':'次の色へ →';
    $('nextBtn').onclick=()=>{if(finished)return;if(gameMode==='best')round++;else round++;newRound();window.scrollTo({top:0,behavior:'smooth'});};
