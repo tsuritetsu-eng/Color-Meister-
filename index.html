@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f7fb">
+<meta name="description" content="赤・緑・青の塗料を調合して、お題の色を再現する色当てゲーム COLOR MEISTER。">
+<title>COLOR MEISTER — 色調合チャレンジ</title>
+<style>
+:root{color-scheme:light;--ink:#202638;--muted:#737d91;--line:#e5e9f1;--panel:#fff;--bg:#f4f6fa;--accent:#6558d3;--shadow:0 12px 34px #29334a12}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#e8eaff 0,transparent 48%),var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#ff626b,#8b65e8 55%,#40a8e8);display:grid;place-items:center;color:#fff;font-size:22px;box-shadow:0 7px 16px #7666cf35}.brand b{font-size:16px;letter-spacing:.12em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.16em;margin-top:3px}.pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;color:#596176}.hero{text-align:center;margin:18px 0 22px}.eyebrow{font-size:11px;letter-spacing:.2em;color:var(--accent);font-weight:800}.hero h1{font-size:clamp(27px,6vw,42px);margin:8px 0 6px;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);font-size:13px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow);min-width:0}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.panel-head h2{font-size:14px;margin:0}.hint{font-size:10px;color:var(--muted)}.target-swatch{height:160px;border-radius:16px;background:#a34bc8;display:grid;place-items:center;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px #0000000a}.target-swatch:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#ffffff25,transparent 55%);pointer-events:none}.target-label{position:relative;color:#fff;font-weight:800;letter-spacing:.2em;text-shadow:0 2px 8px #0005;font-size:12px}.target-note{text-align:center;color:var(--muted);font-size:11px;margin:11px 0 0}.mix-area{display:flex;flex-direction:column;align-items:center}.mix-beaker{width:min(100%,230px);height:205px;position:relative;margin:0 auto 8px}.glass{position:absolute;inset:7px 20px 7px;border:4px solid #b9c7d7;border-top:0;border-radius:0 0 30px 30px;clip-path:polygon(0 0,100% 0,91% 100%,9% 100%);background:linear-gradient(90deg,#d8e5f044,#fff9 20%,#dbe8f044 78%,#fff9);overflow:hidden}.liquid{position:absolute;bottom:0;left:0;right:0;height:0;background:#a34bc8;transition:height .3s,background .22s;border-radius:0 0 28px 28px;opacity:.9}.liquid:before{content:"";position:absolute;left:-5%;top:-7px;width:110%;height:14px;border-radius:50%;background:#ffffff55;border-bottom:2px solid #ffffff55}.shine{position:absolute;top:20px;bottom:18px;left:35px;width:9px;border-radius:99px;background:#fff8;transform:rotate(4deg)}.glass-mark{position:absolute;right:16px;top:35px;bottom:30px;width:16px;border-top:1px solid #9cacc0aa;border-bottom:1px solid #9cacc0aa;background:repeating-linear-gradient(to bottom,transparent 0 23px,#91a1b455 24px 25px)}.beaker-neck{position:absolute;left:35px;right:35px;top:0;height:15px;border:4px solid #b9c7d7;border-bottom:0;border-radius:8px 8px 0 0}.beaker-foot{position:absolute;bottom:0;left:29px;right:29px;height:8px;border-bottom:4px solid #b9c7d7;border-radius:50%}.mix-code{font-size:12px;font-weight:800;letter-spacing:.08em;color:#596176}.paint-list{display:grid;gap:13px;margin-top:15px}.paint-row{display:grid;grid-template-columns:38px 1fr 42px;align-items:center;gap:10px}.paint-dot{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:inset 0 0 0 1px #0000000b}.paint-info{min-width:0}.paint-title{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;margin-bottom:6px}.paint-title span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:700}.paint-row input{width:100%;accent-color:var(--c);height:6px;cursor:pointer}.amount{font-size:11px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}.mix-actions{display:flex;gap:10px;margin-top:18px}.btn{border:0;border-radius:13px;padding:13px 16px;font-weight:800;cursor:pointer;transition:transform .12s,filter .12s}.btn:active{transform:scale(.98)}.btn-primary{background:var(--accent);color:white;box-shadow:0 7px 16px #6558d344;flex:1}.btn-secondary{background:#f0f2f7;color:#525c70}.result{display:none;margin-top:16px}.result.show{display:block}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result-color{height:72px;border-radius:12px;margin-bottom:7px}.result small{color:var(--muted);font-size:10px}.score{text-align:center;background:#f4f2ff;border-radius:16px;padding:15px;margin-top:12px}.score strong{font-size:36px;color:var(--accent);letter-spacing:-.05em}.score div{font-weight:800;font-size:12px}.score p{font-size:11px;color:var(--muted);margin:5px 0 0}.footer{text-align:center;color:#9aa2b2;font-size:10px;margin-top:20px}
+@media(max-width:650px){.app{padding:16px 13px 30px}.layout{grid-template-columns:1fr}.panel{padding:16px}.target-swatch{height:130px}.mix-beaker{height:175px}.hero{margin:12px 0 18px}.top{margin-bottom:13px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top"><div class="brand"><div class="logo">✣</div><div><b>COLOR MEISTER</b><small>THE COLOR MIXING GAME</small></div></div><div class="pill" id="roundPill">ROUND 1 / 5</div></header>
+<section class="hero"><div class="eyebrow">COLOR MATCH CHALLENGE</div><h1>色を、つくろう。</h1><p>3色の塗料を調合して、お題の色を再現しよう！</p></section>
+<div class="layout">
+<section class="panel"><div class="panel-head"><h2>🎨 お題の色</h2><span class="hint">TARGET COLOR</span></div><div class="target-swatch" id="targetSwatch"><span class="target-label">MATCH THIS COLOR</span></div><p class="target-note">この色にできるだけ近づけよう。正解のコードは最後に発表！</p></section>
+<section class="panel"><div class="panel-head"><h2>🧪 調合ビーカー</h2><span class="hint">YOUR MIX</span></div><div class="mix-area"><div class="mix-beaker"><div class="beaker-neck"></div><div class="glass"><div class="liquid" id="liquid"></div><div class="shine"></div><div class="glass-mark"></div></div><div class="beaker-foot"></div></div><div class="mix-code" id="mixCode">#000000</div></div>
+<div class="paint-list">
+<div class="paint-row" style="--c:#ef4444"><div class="paint-dot" style="background:#ef4444">R</div><div class="paint-info"><div class="paint-title"><span>RED / 赤</span><span id="redVal">128</span></div><input id="red" type="range" min="0" max="255" value="128"></div><div class="amount">滴</div></div>
+<div class="paint-row" style="--c:#22a06b"><div class="paint-dot" style="background:#22a06b">G</div><div class="paint-info"><div class="paint-title"><span>GREEN / 緑</span><span id="greenVal">128</span></div><input id="green" type="range" min="0" max="255" value="128"></div><div class="amount">滴</div></div>
+<div class="paint-row" style="--c:#3478eb"><div class="paint-dot" style="background:#3478eb">B</div><div class="paint-info"><div class="paint-title"><span>BLUE / 青</span><span id="blueVal">128</span></div><input id="blue" type="range" min="0" max="255" value="128"></div><div class="amount">滴</div></div>
+</div>
+<div class="mix-actions"><button class="btn btn-secondary" id="resetBtn">リセット</button><button class="btn btn-primary" id="judgeBtn">この色で決定！</button></div>
+</section>
+</div>
+<section class="panel result" id="resultPanel"><div class="panel-head"><h2>🏆 調合結果</h2><span class="hint">RESULT</span></div><div class="result-grid"><div><div class="result-color" id="targetResult"></div><small>お題の色 <b id="targetCode"></b></small></div><div><div class="result-color" id="mixResult"></div><small>あなたの色 <b id="yourCode"></b></small></div></div><div class="score"><strong id="scoreValue">0</strong><div id="scoreLabel">POINTS</div><p id="scoreDetail"></p></div><div class="mix-actions"><button class="btn btn-secondary" id="retryBtn">もう一度調合</button><button class="btn btn-primary" id="nextBtn">次の色へ →</button></div></section>
+<div class="footer">COLOR MEISTER · MIX YOUR OWN COLOR</div>
+</main>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id);
+ const ids=['red','green','blue']; let target=[163,75,200],round=1,judged=false;
+ const hex=v=>v.toString(16).padStart(2,'0').toUpperCase();
+ const code=rgb=>'#'+rgb.map(hex).join('');
+ const current=()=>ids.map(id=>Number($(id).value));
+ function paint(){
+  const rgb=current(),c=code(rgb); $('redVal').textContent=rgb[0];$('greenVal').textContent=rgb[1];$('blueVal').textContent=rgb[2];
+  $('liquid').style.background=c;$('liquid').style.height=(Math.max(...rgb)/255*72+8)+'%';$('mixCode').textContent=c;
+ }
+ function newRound(){
+  target=Array.from({length:3},()=>Math.floor(35+Math.random()*186)); 
+  $('targetSwatch').style.background=code(target);$('roundPill').textContent='ROUND '+round+' / 5';
+  ids.forEach(id=>$(id).value=128);$('resultPanel').classList.remove('show');judged=false;paint();
+ }
+ function judge(){
+  if(judged)return;judged=true;
+  const rgb=current();
+  // Weighted RGB distance, normalized to a 0–100 score.
+  const d=Math.sqrt(.299*(rgb[0]-target[0])**2+.587*(rgb[1]-target[1])**2+.114*(rgb[2]-target[2])**2);
+  const score=Math.max(0,Math.round(100*(1-d/255)));
+  $('targetResult').style.background=code(target);$('mixResult').style.background=code(rgb);
+  $('targetCode').textContent=code(target);$('yourCode').textContent=code(rgb);
+  $('scoreValue').textContent=score;$('scoreLabel').textContent=score===100?'PERFECT MATCH!':score>=90?'AMAZING!':score>=75?'GREAT JOB!':score>=50?'NOT BAD!':'KEEP MIXING!';
+  $('scoreDetail').textContent='RGBの色差をもとに採点 · '+(score>=90?'職人級の調合！':score>=75?'かなり近い色になったね！':score>=50?'あと少しで正解！':'配合を変えて再挑戦してみよう！');
+  $('resultPanel').classList.add('show');$('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+ }
+ ids.forEach(id=>$(id).addEventListener('input',paint));
+ $('judgeBtn').addEventListener('click',judge);
+ $('resetBtn').addEventListener('click',()=>{ids.forEach(id=>$(id).value=128);paint()});
+ $('retryBtn').addEventListener('click',()=>{ids.forEach(id=>$(id).value=128);$('resultPanel').classList.remove('show');judged=false;paint()});
+ $('nextBtn').addEventListener('click',()=>{if(round>=5){round=1;newRound();$('hero');}else{round++;newRound();}window.scrollTo({top:0,behavior:'smooth'})});
+ newRound();
+})();
+</script>
+</body>
+</html>
