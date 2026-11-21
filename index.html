@@ -105,8 +105,7 @@ button,input{font:inherit}.app{width:min(100%,900px);margin:auto;padding:22px 18
    $('scoreDetail').textContent='5問終了！合計 '+total+' 点。最高記録は '+getBest()+' 点です。';
    $('nextBtn').textContent='もう一度挑戦';
   }else{
-   updateStats();$('nextBtn').textContent=gameMode==='time'?'次の色へ →':'次の色へ →';
-   $('nextBtn').onclick=()=>{if(finished)return;if(gameMode==='best')round++;else round++;newRound();window.scrollTo({top:0,behavior:'smooth'});};
+   updateStats();$('nextBtn').textContent='次の色へ →';
   }
   $('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
  }
